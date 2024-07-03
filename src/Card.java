@@ -13,7 +13,7 @@ public class Card {
 
     @Override
     public String toString() {
-        return name + " (" + category + ")";
+        return name;
     }
 
     public Category getCategory() {

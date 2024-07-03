@@ -1,4 +1,3 @@
-import java.awt.*;
 import java.util.ArrayList;
 
 public class Game {
@@ -41,5 +40,17 @@ public class Game {
 
     public Player[] getPlayers() {
         return players;
+    }
+
+    public Category[] getCategoryArr() {
+        return categories.toArray(new Category[categories.size()]);
+    }
+
+    public void clearHasNot(Card card) {
+        for (Player player : players) {
+            try {
+                if (player.getHasNot().contains(card)) player.removeFromHasNot(card);
+            } catch (NullPointerException e) {}
+        }
     }
 }

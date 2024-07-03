@@ -19,7 +19,7 @@ public class Category {
 
     public boolean addCard(Card card) {
         if (cards.contains(card)) return true;
-        if (cards.size() <= 4) {
+        if (cards.size() < 4) {
             cards.add(card);
             return true;
         }
@@ -35,5 +35,9 @@ public class Category {
     @Override
     public String toString() {
         return name;
+    }
+
+    public Card[] getCardArr() {
+        return cards.toArray(new Card[cards.size()]);
     }
 }

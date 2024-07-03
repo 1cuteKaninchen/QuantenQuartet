@@ -18,6 +18,7 @@ public class Main extends JFrame implements ActionListener {
         startButton.addActionListener(this);
         add(startButton, BorderLayout.SOUTH);
         setSize(480, 320);
+        setLocationRelativeTo(null);
         setVisible(true);
     }
 
@@ -30,7 +31,7 @@ public class Main extends JFrame implements ActionListener {
         ArrayList<Player> players = new ArrayList<>();
         int id = 0;
         for (String s : playerNamesArea.getText().split("\n")) {
-            players.add(new Player(s, id));
+            players.add(new Player(s, id, playerNamesArea.getText().split("\n").length));
             id++;
         }
         new Game(players.toArray(new Player[players.size()]));

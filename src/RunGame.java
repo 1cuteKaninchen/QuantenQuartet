@@ -1,17 +1,17 @@
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.TimeUnit;
 
 public class RunGame extends JFrame {
 
+    private boolean askable = false;
     private Card askedCard;
     private Category askedCategory;
     private Game game;
     private boolean gameOver = false;
     private boolean waitingForAnswer;
     private JComboBox<Player> playerBox;
-    private JComboBox<String> categoryBox;
-    private JComboBox<String> cardBox;
+    private JComboBox<Category> categoryBox;
+    private JComboBox<Card> cardBox;
     private JButton ask = new JButton("ask");
     private JButton yes = new JButton("yes");
     private JButton no = new JButton("no");
@@ -22,7 +22,11 @@ public class RunGame extends JFrame {
         this.game = game;
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         JPanel playerPanel = new JPanel();
-        playerPanel.setLayout(new GridLayout((int) Math.ceil(Math.sqrt(players.length)), (int) Math.ceil(Math.sqrt(players.length))));
+        if (players.length < 8) {
+            playerPanel.setLayout(new GridLayout((int) Math.ceil(Math.sqrt(players.length)) - 1, (int) Math.ceil(Math.sqrt(players.length)) + 1));
+        } else {
+            playerPanel.setLayout(new GridLayout(2, (int) Math.ceil(players.length / 2)));
+        }
         for (Player player : players) {
             playerPanel.add(player);
         }
@@ -31,9 +35,12 @@ public class RunGame extends JFrame {
         JPanel comboboxPanel = new JPanel();
         playerBox = new JComboBox(players);
         playerBox.setEditable(false);
-        categoryBox = new JComboBox();
+        String[] initialCategoryBox = {"input your category"};
+        categoryBox = new JComboBox(initialCategoryBox);
+        categoryBox.addActionListener(new CardBoxUpdater(this));
         categoryBox.setEditable(true);
-        cardBox = new JComboBox();
+        String[] initialCardBox = {"input your card"};
+        cardBox = new JComboBox(initialCardBox);
         cardBox.setEditable(true);
         comboboxPanel.add(playerBox);
         comboboxPanel.add(categoryBox);
@@ -53,10 +60,9 @@ public class RunGame extends JFrame {
         buttonPanel.add(reset);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        setSize(240 * (int) Math.ceil(Math.sqrt(players.length)), 100 + 160 * (int) Math.ceil(Math.sqrt(players.length)));
+        setSize(Math.max(players[0].getWIDTH() * (players[0].getPlayerCount() / 2), 480), Math.max(40 + players[0].getFINALHIGHT() * ((int) Math.ceil(Math.sqrt(players.length)) - 1), 360));
+        setLocationRelativeTo(null);
         setVisible(true);
-
-
     }
 
     void setWaitingForAnswer(boolean waitingForAnswer) {
@@ -70,7 +76,7 @@ public class RunGame extends JFrame {
             ask.setEnabled(true);
             yes.setEnabled(false);
             no.setEnabled(false);
-            game.changeAtTurn();
+            updateBoxes();
             enableBoxes();
         }
     }
@@ -92,10 +98,13 @@ public class RunGame extends JFrame {
     }
 
     public Card getChosenCard() throws NullPointerException {
-        return new Card(cardBox.getSelectedItem().toString(), new Category(categoryBox.getSelectedItem().toString()));
+        return new Card(cardBox.getSelectedItem().toString(), getChosenCategory());
     }
 
     public Category getChosenCategory() throws NullPointerException {
+        if (categoryBox.getSelectedItem().getClass().equals(Category.class)) {
+            return (Category) categoryBox.getSelectedItem();
+        }
         return new Category(categoryBox.getSelectedItem().toString());
     }
 
@@ -113,5 +122,32 @@ public class RunGame extends JFrame {
 
     public Category getAskedCategory() {
         return askedCategory;
+    }
+
+    public void updateBoxes() {
+        categoryBox.removeAllItems();
+        for (Category category : game.getCategoryArr()) {
+            categoryBox.addItem(category);
+        }
+        updateCardBox();
+    }
+
+    public void updateCardBox() {
+        askable = true;
+        cardBox.removeAllItems();
+        try {
+            if (categoryBox.getSelectedItem().getClass().equals(String.class)) return;
+            for (Card card : ((Category) categoryBox.getSelectedItem()).getCardArr()) {
+                cardBox.addItem(card);
+            }
+        } catch (NullPointerException e) {}
+    }
+
+    public void gameOver(Player Winner, Category fullQuartet) {
+        JOptionPane.showMessageDialog(null, Winner + " has won by collecting all cards of " + fullQuartet + "!", "Congratulations!", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public boolean isAskable() {
+        return askable;
     }
 }
